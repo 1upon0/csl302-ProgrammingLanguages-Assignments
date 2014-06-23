@@ -1,0 +1,3 @@
+father(X,Y,Z,U).
+father(X,t).
+son:- father(X,F,y),dad(F,s).

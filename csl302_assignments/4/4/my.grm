@@ -1,0 +1,47 @@
+
+open Ast
+%%
+
+%pos int 
+%name Calc
+
+%term VAR of string|NAME of string|PERIOD|IF|COMMA|LPAREN|RPAREN|EOF|INT of int|CONSTANT of real|SPACE|NEWLINE
+  	|LBRACKET|RBRACKET|OPER of string|COMPOPER of string|VERTICAL
+
+%nonterm START of exp1|PROGRAM of exp1 list|STATEMENT of exp1|FACT of exp1|RULE of exp1|LITERAL of exp1|HEAD of exp1
+	|BODY of exp1|TUPLETERM of exp1 list|TERMM of exp1|T of exp1 list
+
+
+%arg (fileName) : string
+
+%eop EOF
+%noshift EOF
+
+%%
+
+START : PROGRAM (node ("sTART", PROGRAM) )
+  	 |	  (node("sTART",[]))
+  
+  PROGRAM: STATEMENT ([STATEMENT])
+          |PROGRAM STATEMENT  (  PROGRAM@[STATEMENT])
+          |PROGRAM PERIOD   (PROGRAM)
+	
+  STATEMENT : FACT PERIOD (FACT)
+  	    | RULE PERIOD (RULE)
+  	  
+  FACT : LITERAL (LITERAL)
+  HEAD : LITERAL (LITERAL)
+  BODY : LITERAL (LITERAL)
+  	|BODY COMMA LITERAL (node ("commaa",[BODY,LITERAL]))
+  RULE : HEAD IF BODY (node ("iff",[HEAD,BODY]))
+  LITERAL : NAME (leaf NAME)
+  	  | NAME TUPLETERM	(node (NAME,TUPLETERM))
+  
+  T : TERMM		( [TERMM])
+    | T COMMA TERMM	(T @ [TERMM])
+  TUPLETERM : LPAREN T RPAREN	( T )
+  
+  TERMM : NAME (leaf NAME)
+        | VAR   (leaf VAR)
+        | NAME TUPLETERM (node (NAME,TUPLETERM))
+	
